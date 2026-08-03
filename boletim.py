@@ -45,7 +45,7 @@ RSS_FEEDS = {
         "InfoMoney - Onde Investir": "https://www.infomoney.com.br/onde-investir/feed/",
     },
     "fundos_imobiliarios": {
-        "Money Times - Fundos Imobiliários": "https://www.moneytimes.com.br/fundos-imobiliarios/feed/",
+        "Money Times - Fundos Imobiliários": "https://www.moneytimes.com.br/tag/fundos-imobiliarios/feed/",
     },
     "economia_br": {
         "InfoMoney - Mercados": "https://www.infomoney.com.br/mercados/feed/",
