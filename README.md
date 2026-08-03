@@ -1,18 +1,24 @@
 # Boletim Econômico Diário 📈
 
 Todo dia útil, de manhã, este robô:
-1. Coleta as principais notícias de **economia do Brasil**, **política do Brasil**
-   e **mercado global**;
-2. Pede para o Claude organizar tudo em um boletim curto, dividido em seções
-   com bullet points;
+1. Coleta as principais notícias de **Renda Fixa/Tesouro Direto**, **Fundos
+   Imobiliários (FIIs)**, **economia e bolsa do Brasil**, **política do
+   Brasil** e **mercado global** (só o que afeta o investidor brasileiro);
+2. Pede para o Claude organizar tudo em um boletim curto, pensado para um
+   **investidor iniciante** — com explicações de termos técnicos na primeira
+   vez que aparecem, e uma linha "📌 na prática" conectando a notícia ao que
+   ela significa para quem tem ações, FIIs ou Tesouro Direto;
 3. Anexa uma lista fixa das 10 empresas mais influentes do Brasil (não é
    gerada por IA — é uma lista editável no próprio código, já que isso não
    muda de um dia para o outro);
 4. Manda o resultado pra você no Telegram.
 
-> Nota sobre custo: como agora são coletadas mais notícias (até 14 de economia
-> BR + 14 de política BR + 8 de mercado global) e o boletim ficou mais longo,
-> o gasto de tokens por execução aumenta um pouco em relação à versão inicial
+> O boletim é puramente informativo — ele explica o que aconteceu e o que
+> isso costuma significar, mas nunca recomenda comprar, vender ou manter um
+> ativo específico. Isso é proposital (veja `ESTILO_BOLETIM` no código).
+
+> Nota sobre custo: como agora são coletadas notícias de 5 categorias, o
+> gasto de tokens por execução é um pouco maior que nas versões anteriores
 > — ainda assim, na faixa de poucos centavos de dólar por dia.
 
 Depois de configurado uma vez, ele roda sozinho — você não precisa executar nada manualmente.
@@ -111,7 +117,7 @@ No Windows, use o **Agendador de Tarefas** apontando para `boletim.py` com o mes
 
 Tudo fica no topo do arquivo `boletim.py`:
 
-- **`RSS_FEEDS`** — agora organizado em 3 categorias (`economia_br`, `politica_br`, `mercado_global`). Adicione, remova ou troque fontes dentro de cada uma.
+- **`RSS_FEEDS`** — agora com 5 categorias (`renda_fixa_tesouro`, `fundos_imobiliarios`, `economia_br`, `politica_br`, `mercado_global`). Adicione, remova ou troque fontes dentro de cada uma.
 - **`COTA_POR_CATEGORIA`** — quantas notícias brutas coletar por categoria antes do resumo (o Claude escolhe as mais relevantes dentro desse total).
 - **`EMPRESAS_MAIS_INFLUENTES`** — a lista fixa de empresas enviada no fim do boletim. Edite os nomes à vontade; não precisa mexer em mais nada.
 - **`ENVIAR_EMPRESAS_TODO_DIA`** — `True` manda a lista de empresas todo dia; `False` manda só às segundas-feiras (útil se achar repetitivo).

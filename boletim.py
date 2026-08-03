@@ -40,12 +40,21 @@ except ImportError:
 # vezes mudam a URL do feed; se uma fonte parar de trazer notícias, veja o
 # README para como testar e substituir.
 RSS_FEEDS = {
+    "renda_fixa_tesouro": {
+        "Money Times - Renda Fixa": "https://www.moneytimes.com.br/renda-fixa/feed/",
+        "InfoMoney - Onde Investir": "https://www.infomoney.com.br/onde-investir/feed/",
+    },
+    "fundos_imobiliarios": {
+        "Money Times - Fundos Imobiliários": "https://www.moneytimes.com.br/fundos-imobiliarios/feed/",
+    },
     "economia_br": {
         "InfoMoney - Mercados": "https://www.infomoney.com.br/mercados/feed/",
         "InfoMoney - Economia": "https://www.infomoney.com.br/economia/feed/",
         "Money Times - Mercados": "https://www.moneytimes.com.br/mercados/feed/",
         "Folha - Mercado": "https://feeds.folha.uol.com.br/mercado/rss091.xml",
-        "Estadão - Economia": "https://www.estadao.com.br/rss/economia.xml",
+        # "Estadão - Economia": removido — o Estadão migrou o RSS para uma
+        # URL nova (formato arc/outboundfeeds) e a antiga parou de funcionar.
+        # Se quiser essa fonte de volta, procure a URL atual e adicione aqui.
     },
     "politica_br": {
         "Poder360": "https://www.poder360.com.br/feed/",
@@ -58,11 +67,14 @@ RSS_FEEDS = {
     },
 }
 
-# Nomes "bonitos" de cada categoria, usados nas seções do boletim.
+# Nomes "bonitos" de cada categoria, usados nas seções do boletim. A ordem
+# aqui também define a ordem das seções na mensagem final.
 NOME_CATEGORIA = {
-    "economia_br": "📊 Economia Brasil",
+    "renda_fixa_tesouro": "🏦 Renda Fixa e Tesouro Direto",
+    "fundos_imobiliarios": "🏢 Fundos Imobiliários (FIIs)",
+    "economia_br": "📊 Economia e Bolsa Brasil",
     "politica_br": "🏛️ Política Brasil",
-    "mercado_global": "🌎 Mercado Global",
+    "mercado_global": "🌎 Mercado Global (impacto no Brasil)",
 }
 
 # Quantas horas "para trás" considerar uma notícia como "de hoje".
@@ -78,6 +90,8 @@ MAX_POR_FEED = 8
 # depois escolhe e resume os mais relevantes dentro de cada seção — por isso
 # aqui vale coletar um pouco mais do que o número final de bullets desejado.
 COTA_POR_CATEGORIA = {
+    "renda_fixa_tesouro": 10,
+    "fundos_imobiliarios": 8,
     "economia_br": 14,
     "politica_br": 14,
     "mercado_global": 8,
@@ -110,28 +124,55 @@ ENVIAR_EMPRESAS_TODO_DIA = True
 
 # Estilo do boletim (ajuste a vontade — isso vai direto no prompt do Claude).
 ESTILO_BOLETIM = """
-Você escreve um boletim diário de economia e política do Brasil, em português
-do Brasil, para ser lido em poucos minutos no celular. Tom: direto, um pouco
-descontraído, sem ser bobo.
+Você escreve um boletim diário para um investidor INICIANTE no Brasil, que tem
+ou está começando a montar uma carteira com ações, Fundos Imobiliários (FIIs)
+e Tesouro Direto/renda fixa. A pessoa quer entender o que aconteceu no Brasil
+e no mundo, e como isso pode afetar a carteira dela — sem jargão sem
+explicação e sem recomendações de compra/venda.
 
-As notícias fornecidas vêm organizadas em categorias (economia_br, politica_br,
-mercado_global). Estruture o boletim em 3 seções, nesta ordem, cada uma com seu
-próprio cabeçalho:
+Em português do Brasil, para ser lido em poucos minutos no celular. Tom:
+direto, didático, um pouco descontraído, sem ser bobo.
 
-1. "📊 Economia Brasil" — até 10 bullets com as notícias de economia brasileira
-   mais relevantes (juros, câmbio, inflação, bolsa, empresas, Banco Central).
-2. "🏛️ Política Brasil" — até 10 bullets com as notícias políticas mais
-   importantes do dia (Congresso, governo, decisões judiciais com peso
-   político/econômico, eleições), priorizando o que tem repercussão real.
-3. "🌎 Mercado Global" — de 3 a 5 bullets com os destaques do mercado
-   internacional que afetam o Brasil ou o investidor brasileiro.
+As notícias fornecidas vêm organizadas em categorias. Estruture o boletim em
+5 seções, NESTA ORDEM, cada uma com seu próprio cabeçalho:
+
+1. "🏦 Renda Fixa e Tesouro Direto" — até 6 bullets: Selic, decisões e atas do
+   Copom, IPCA/inflação, curva de juros, novidades de CDB/LCI/LCA/Tesouro
+   Direto. É a seção mais importante para quem tem Tesouro na carteira.
+2. "🏢 Fundos Imobiliários (FIIs)" — até 5 bullets: variação do IFIX,
+   distribuições de dividendos, vacância/ocupação de shoppings e galpões
+   logísticos, novos fundos, fusões/vendas de ativos.
+3. "📊 Economia e Bolsa Brasil" — até 8 bullets: Ibovespa, câmbio, resultados
+   de empresas, decisões do Banco Central, indicadores econômicos.
+4. "🏛️ Política Brasil" — até 6 bullets: só o que tem repercussão econômica ou
+   de mercado real (reformas, arcabouço fiscal, decisões do Congresso/STF com
+   peso econômico) — não é preciso cobrir toda a política, só o que move
+   dinheiro.
+5. "🌎 Mercado Global (impacto no Brasil)" — até 4 bullets: SÓ inclua algo
+   aqui se tiver conexão clara com o investidor brasileiro (decisões do Fed,
+   petróleo, dólar, commodities, crises que mexem com capital estrangeiro na
+   B3). Ignore notícias globais que não afetam o Brasil, mesmo que sejam
+   grandes (ex: fusão de empresas americanas sem ligação com o mercado
+   brasileiro), a menos que sejam mesmo o destaque do dia.
 
 Regras gerais:
 - Cada bullet tem 1-2 frases, começando com um emoji relevante ao tema.
-- Se uma categoria tiver poucas notícias relevantes nesse dia, é normal trazer
-  menos bullets do que o máximo — não invente ou repita conteúdo para
-  completar a cota.
+- Sempre que fizer sentido, adicione uma linha curta abaixo do bullet
+  começando com "📌 na prática:" explicando o que isso significa para quem
+  tem ações, FIIs ou Tesouro Direto (ex: "📌 na prática: Tesouro prefixado que
+  você já tem tende a subir de preço"). Não force essa linha em bullets onde
+  não há uma implicação prática clara — é melhor omitir do que forçar.
+- Na primeira vez que um termo técnico aparecer no dia (CDI, marcação a
+  mercado, come-cotas, vacância, dividend yield, etc.), explique em poucas
+  palavras entre parênteses logo depois do termo. Não repita a explicação se
+  o termo aparecer de novo no mesmo boletim.
+- Se uma seção tiver poucas notícias relevantes nesse dia, é normal trazer
+  menos bullets do que o máximo (inclusive zero) — não invente ou repita
+  conteúdo para completar a cota.
 - Não invente números ou fatos que não estejam nas notícias fornecidas.
+- NUNCA recomende comprar, vender ou manter um ativo específico. O boletim é
+  informativo, não é indicação de investimento — a decisão é sempre do
+  leitor.
 - Termine com uma linha curta e opcional de "o que ficar de olho amanhã".
 - Não use markdown de tabela nem HTML. Use apenas texto simples e emojis.
 """
