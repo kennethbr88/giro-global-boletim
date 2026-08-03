@@ -122,6 +122,16 @@ EMPRESAS_MAIS_INFLUENTES = [
 # já que ele quase não muda). Ajuste conforme sua preferência.
 ENVIAR_EMPRESAS_TODO_DIA = True
 
+# Aviso fixo, colado no fim de toda mensagem — texto simples, sem custo de
+# API (não passa pelo Claude). Importante se você for compartilhar o boletim
+# com outras pessoas, não só usar sozinho.
+AVISO_LEGAL = (
+    "⚠️ Conteúdo informativo gerado por IA a partir de notícias públicas. "
+    "Não é recomendação de investimento, análise ou consultoria financeira. "
+    "Sempre confirme as informações e avalie seu próprio perfil antes de "
+    "tomar qualquer decisão."
+)
+
 # Estilo do boletim (ajuste a vontade — isso vai direto no prompt do Claude).
 ESTILO_BOLETIM = """
 Você escreve um boletim diário para um investidor INICIANTE no Brasil, que tem
@@ -296,6 +306,8 @@ def gerar_boletim(itens_por_categoria):
     if ENVIAR_EMPRESAS_TODO_DIA or datetime.now().weekday() == 0:  # 0 = segunda-feira
         boletim += "\n\n🏢 As 10 empresas mais influentes do Brasil (lista fixa, atualizada periodicamente):\n"
         boletim += "\n".join(f"{i}. {nome}" for i, nome in enumerate(EMPRESAS_MAIS_INFLUENTES, 1))
+
+    boletim += f"\n\n{AVISO_LEGAL}"
 
     return boletim
 

@@ -121,6 +121,7 @@ Tudo fica no topo do arquivo `boletim.py`:
 - **`COTA_POR_CATEGORIA`** — quantas notícias brutas coletar por categoria antes do resumo (o Claude escolhe as mais relevantes dentro desse total).
 - **`EMPRESAS_MAIS_INFLUENTES`** — a lista fixa de empresas enviada no fim do boletim. Edite os nomes à vontade; não precisa mexer em mais nada.
 - **`ENVIAR_EMPRESAS_TODO_DIA`** — `True` manda a lista de empresas todo dia; `False` manda só às segundas-feiras (útil se achar repetitivo).
+- **`AVISO_LEGAL`** — o aviso fixo colado no fim de toda mensagem, deixando claro que o conteúdo é informativo e não é recomendação de investimento. Não é gerado por IA (texto fixo, sem custo de API). Importante manter se você for compartilhar o boletim com mais gente.
 - **`ESTILO_BOLETIM`** — o "prompt de sistema" que define o tom e formato do boletim, incluindo quantos bullets cada seção deve ter. Edite à vontade.
 - **`JANELA_HORAS`** — quantas horas "para trás" contam como notícia de hoje.
 - **Horário de envio** — edite a linha `cron` em `.github/workflows/boletim-diario.yml` (formato: minuto hora dia mês dia-da-semana, sempre em UTC).
@@ -137,12 +138,45 @@ Se vier vazio, procure no Google por `"nome do site" rss feed` para achar a URL 
 
 ---
 
+## Compartilhando com mais gente (canal do Telegram)
+
+Hoje o `TELEGRAM_CHAT_ID` aponta para uma conversa pessoal (você e o bot). Para
+compartilhar o boletim com uma comunidade inteira, o jeito mais simples é
+transformar isso num **canal do Telegram** — o mesmo código de envio funciona
+sem nenhuma mudança, só troca o destino.
+
+**Passo a passo:**
+
+1. No Telegram, crie um **canal** novo (não é um "grupo" — é a opção
+   "Canal"/"Channel"), público ou privado, com o nome que quiser.
+2. Adicione seu bot (o mesmo do `.env`) como **administrador** do canal
+   (Configurações do canal → Administradores → Adicionar administrador).
+3. Descubra o identificador do canal para colocar no `TELEGRAM_CHAT_ID`:
+   - Se o canal for **público**, use o próprio `@nomedocanal` (com arroba) —
+     não precisa descobrir número nenhum.
+   - Se o canal for **privado**, mande uma mensagem qualquer nele e rode
+     `python get_chat_id.py SEU_TOKEN` de novo — o chat_id do canal aparece
+     na lista (geralmente um número negativo, tipo `-1001234567890`).
+4. Atualize o `TELEGRAM_CHAT_ID` (no `.env` local e no Secret do GitHub) com
+   esse novo valor.
+5. Pronto — todo mundo que entrar no canal passa a receber o boletim
+   automaticamente, sem custo adicional de API (o Claude gera o texto uma
+   vez só por dia, independente de quantas pessoas estão no canal).
+
+**Sobre monetizar:** se pensar em cobrar (mesmo que um valor simbólico), vale
+conversar com um contador sobre as obrigações de declarar essa renda (ex:
+MEI). E não deixe de manter o `AVISO_LEGAL` visível — ele existe justamente
+para deixar claro que o boletim é informativo, não uma recomendação de
+investimento.
+
+---
+
 ## Arquivos do projeto
 
 | Arquivo | Para que serve |
 |---|---|
 | `boletim.py` | Script principal (coleta → resume → envia) |
-| `get_chat_id.py` | Ajuda a descobrir seu `chat_id` do Telegram |
+| `get_chat_id.py` | Ajuda a descobrir seu `chat_id` do Telegram (pessoal ou de canal) |
 | `requirements.txt` | Dependências Python |
 | `.env.example` | Modelo de configuração local |
 | `.github/workflows/boletim-diario.yml` | Agendamento automático via GitHub Actions |
