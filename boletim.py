@@ -312,14 +312,33 @@ def enviar_telegram(mensagem):
     # Telegram tem limite de ~4096 caracteres por mensagem. Divide em pedaços
     # se precisar, tentando não cortar no meio de uma linha.
     for pedaco in _dividir_em_pedacos(mensagem, 3800):
-        resp = requests.post(url, data={
+        _post_com_retry(url, {
             "chat_id": chat_id,
             "text": pedaco,
             "disable_web_page_preview": True,
-        }, timeout=30)
-        if resp.status_code != 200:
-            raise RuntimeError(f"Falha ao enviar mensagem no Telegram: {resp.status_code} {resp.text}")
+        })
         time.sleep(0.5)  # evita rate limit se houver múltiplos pedaços
+
+
+def _post_com_retry(url, dados, tentativas=3, timeout=60):
+    """Faz um POST com algumas tentativas, para tolerar lentidão de rede
+    pontual (ex: timeout ocasional ao falar com a API do Telegram)."""
+    ultimo_erro = None
+    for tentativa in range(1, tentativas + 1):
+        try:
+            resp = requests.post(url, data=dados, timeout=timeout)
+            if resp.status_code == 200:
+                return resp
+            ultimo_erro = RuntimeError(f"HTTP {resp.status_code}: {resp.text}")
+        except requests.exceptions.RequestException as e:
+            ultimo_erro = e
+
+        if tentativa < tentativas:
+            espera = 5 * tentativa  # espera um pouco mais a cada tentativa
+            print(f"[aviso] Tentativa {tentativa} falhou ({ultimo_erro}). Tentando de novo em {espera}s...")
+            time.sleep(espera)
+
+    raise RuntimeError(f"Falha ao enviar mensagem no Telegram após {tentativas} tentativas: {ultimo_erro}")
 
 
 def _dividir_em_pedacos(texto, tamanho_max):
