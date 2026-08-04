@@ -101,6 +101,12 @@ COTA_POR_CATEGORIA = {
 # custo por execução, com resumos um pouco mais simples.
 MODEL = "claude-sonnet-5"
 
+# Limite de tamanho da resposta gerada pelo Claude. Em dias com muitas
+# notícias relevantes (5 seções + "na prática" em cada bullet), o texto pode
+# ficar longo — se esse limite for baixo demais, a resposta é cortada no meio
+# da frase. 3000 dá uma margem confortável para o formato atual do boletim.
+MAX_TOKENS_RESPOSTA = 3000
+
 # Lista fixa e editável — não é gerada pelo Claude nem muda sozinha, porque a
 # posição das maiores empresas do Brasil não muda de um dia para o outro.
 # Atualize esta lista manualmente de vez em quando (ex: 1x por ano) se quiser.
@@ -295,10 +301,15 @@ def gerar_boletim(itens_por_categoria):
 
     resposta = client.messages.create(
         model=MODEL,
-        max_tokens=2000,
+        max_tokens=MAX_TOKENS_RESPOSTA,
         system=ESTILO_BOLETIM,
         messages=[{"role": "user", "content": prompt}],
     )
+
+    if resposta.stop_reason == "max_tokens":
+        print(f"[aviso] A resposta do Claude foi CORTADA por atingir o limite de "
+              f"{MAX_TOKENS_RESPOSTA} tokens. Considere aumentar MAX_TOKENS_RESPOSTA "
+              f"no boletim.py.")
 
     partes_texto = [bloco.text for bloco in resposta.content if bloco.type == "text"]
     boletim = "\n".join(partes_texto).strip()
